@@ -1,5 +1,6 @@
 #Yugioh probability estimator that takes Prosperity, Desires, Upstart, Extravagance, Duality into account
 #Very early stages of testing
+#Can copy all this into https://www.online-python.com/online_python_compiler or another online compiler if you don't want to learn how to download python.
 
 #deck_size and hand_size are self-explanatory
 #In input_cards_here: Enter card name *space* quantity, then hit enter. Leave no spaces in card names
