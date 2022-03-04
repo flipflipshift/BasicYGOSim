@@ -4,40 +4,50 @@
 
 #deck_size and hand_size are self-explanatory
 #In input_cards_here: Enter card name *space* quantity, then hit enter. Leave no spaces in card names
-#Certain draw cards have their effects built in. Write Desires, Prosperity, Extravagance, Upstart as the names for those cards
+#After the quantity, you can write other names the card can by. For instance, things it directly/indirectly searches...
+#or something like Monster or TriBrigadeMonster etc if you have some combos that can use any card of that type.
+#Certain draw/excavation cards have their effects built in. Write Desires, Prosperity, Extravagance, Upstart, Duality as the names for those cards
 
 #For input_possibilities_heare, list the acceptable combinations of cards in hand. Follow the syntax in the example
-#In the example here, the first line means "1 or more Bond, 1 or more Bridge, exactly 0 Garnet and 1 or fewer Carbuncle"
+#For example 2 + A AND 1 - B AND 0 = C means "2 or more of A, 1 or fewer of B, exactly 0 of C
 #Each line represents a different acceptable combination of cards in hand
 
 #Final line is the number of trials
 
 #outputs the estimated probability you get one of these desired combinations
+
 deck_size = 40
 hand_size = 5
 input_cards_here="""
-Beacon 3
-Bond 3
-Bridge 3
-Prosperity 3
-Upstart 1
-Carbuncle 2
+Dog 3 Fluffal
+Owl 1 Fluffal
+Bear 3 Fluffal
+Goods 3 Fluffal Edge
+Edge 4
+Fluffal 7
+Poly 2
+Patch 2 Edge Poly
+BrilliantFus 3
 Garnet 1
+HandTrap 8
 """
 input_possibilities_here="""
-1 + Bond AND 1 + Bridge AND 0 = Garnet AND 1 - Carbuncle
-1 + Bond AND 1 + Beacon AND 0 = Garnet AND 1 - Carbuncle
-1 + Bridge AND 1 + Beacon AND 0 = Garnet AND 1 - Carbuncle
-2 + Bridge AND 0 = Garnet AND 1 - Carbuncle
+Fluffal AND Edge AND Poly
+Fluffal AND Patch AND 1 - Poly
+Dog AND Poly
+Owl AND Edge
+Bear AND BrilliantFUs AND 0 = Garnet
+2 + HandTrap
 """
 num_trials=10000
 
 #Below is the actual code; can ignore
 
 
-
+from itertools import product
 import random
 
+card_hash = dict()
 def empty_deck(n):
 	deck=[]
 	for i in range(0, n):
@@ -66,6 +76,14 @@ def get_hand(deck, k):
 		extras.append(deck[i])
 	return([hand,extras])
 
+def hand_comb(hand):
+	cats=[]
+	for c in hand:
+		if c!="blank":
+			cats.append(card_hash[c])
+	return product(*cats)
+
+
 def is_valid(hand, condition):
 	for cond in condition:
 		card=cond[0]
@@ -81,9 +99,11 @@ def is_valid(hand, condition):
 	return True
 
 def is_one_valid(hand,possibilities):
-	for p in possibilities:
-		if is_valid(hand,p):
-			return True
+	combs = hand_comb(hand)
+	for comb in combs:
+		for p in possibilities:
+			if is_valid(comb,p):
+				return True
 	return False
 
 def is_one_valid_draw(hand,extras,possibilities,can_extrav,can_desires,can_upstart,can_prosperity,can_duality):
@@ -128,12 +148,18 @@ def is_one_valid_draw(hand,extras,possibilities,can_extrav,can_desires,can_upsta
 				return True
 	return False
 
+
 deck=empty_deck(deck_size)
 cards=input_cards_here.splitlines()
 cards.pop(0)
 for card in cards:
 	s=card.split(" ")
 	deck=add_card(deck,s[0],int(s[1]))
+	card_cats=[]
+	card_cats.append(s[0])
+	for i in range(2, len(s)):
+		card_cats.append(s[i])
+	card_hash[s[0]]=card_cats
 
 possibilities=[]
 text_possibilities=input_possibilities_here.splitlines()
@@ -143,7 +169,10 @@ for possibility in text_possibilities:
 	text_conditions=possibility.split(" AND ")
 	for condition in text_conditions:
 		parts=condition.split(" ")
-		conditions.append([parts[2],int(parts[0]),parts[1]])
+		if parts[0].isnumeric():
+			conditions.append([parts[2],int(parts[0]),parts[1]])
+		else:
+			conditions.append([parts[0], 1, '+'])
 	possibilities.append(conditions)
 
 counter=0
@@ -152,4 +181,3 @@ for i in range(0,num_trials):
 	if is_one_valid_draw(hand[0],hand[1],possibilities,True,True,True,True,True):
 		counter+=1
 print("probability of success: "+ str(counter/num_trials*100)+"%")
-
