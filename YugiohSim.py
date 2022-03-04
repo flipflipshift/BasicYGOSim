@@ -10,6 +10,7 @@
 
 #For input_possibilities_heare, list the acceptable combinations of cards in hand. Follow the syntax in the example
 #For example 2 + A AND 1 - B AND 0 = C means "2 or more of A, 1 or fewer of B, exactly 0 of C
+#Instead of 1 + A, you can just write A. So the first line means "1 or more Fluffal and 1 or more Edge and 1 or more poly"
 #Each line represents a different acceptable combination of cards in hand
 
 #Final line is the number of trials
