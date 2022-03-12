@@ -1,8 +1,7 @@
 #Yugioh probability estimator that takes Prosperity, Desires, Upstart, Extravagance, Duality into account
-#Very early stages of testing
 #Can copy all this into https://www.online-python.com/online_python_compiler or another online compiler if you don't want to learn how to download python.
 
-#deck_size and hand_size are self-explanatory
+
 #In input_cards_here: Enter card name *space* quantity, then hit enter. Leave no spaces in card names
 #After the quantity, you can write other names the card can by. For instance, things it directly/indirectly searches...
 #or something like Monster or TriBrigadeMonster etc if you have some combos that can use any card of that type.
@@ -23,7 +22,7 @@ input_cards_here="""
 Dog 3 Fluffal
 Owl 1 Fluffal
 Bear 3 Fluffal
-Goods 3 Fluffal Edge
+Goods 3 Dog Owl Bear Fluffal Edge
 Edge 4
 Fluffal 7
 Poly 2
@@ -37,7 +36,7 @@ Fluffal AND Edge AND Poly
 Fluffal AND Patch AND 1 - Poly
 Dog AND Poly
 Owl AND Edge
-Bear AND BrilliantFUs AND 0 = Garnet
+Bear AND BrilliantFus AND 0 = Garnet
 2 + HandTrap
 """
 num_trials=10000
@@ -47,8 +46,8 @@ num_trials=10000
 
 from itertools import product
 import random
+import sys
 
-card_hash = dict()
 def empty_deck(n):
 	deck=[]
 	for i in range(0, n):
@@ -149,31 +148,50 @@ def is_one_valid_draw(hand,extras,possibilities,can_extrav,can_desires,can_upsta
 				return True
 	return False
 
-
+card_hash = dict()
 deck=empty_deck(deck_size)
-cards=input_cards_here.splitlines()
-cards.pop(0)
-for card in cards:
-	s=card.split(" ")
-	deck=add_card(deck,s[0],int(s[1]))
+all_cats=[]
+cardlines=input_cards_here.splitlines()
+cardlines.pop(0)
+for cardline in cardlines:
+	s=cardline.split(" ")
+	#catch int error here
+	try:
+		deck=add_card(deck,s[0],int(s[1]))
+	except:
+		print("Error in input_cards_here, check line "+cardline)
+		sys.exit(0)
+	all_cats.append(s[0])
 	card_cats=[]
 	card_cats.append(s[0])
 	for i in range(2, len(s)):
 		card_cats.append(s[i])
+		if s[i] not in all_cats:
+			all_cats.append(s[i])
 	card_hash[s[0]]=card_cats
 
 possibilities=[]
 text_possibilities=input_possibilities_here.splitlines()
 text_possibilities.pop(0)
 for possibility in text_possibilities:
+	if len(possibility)==0:
+		continue
 	conditions=[]
-	text_conditions=possibility.split(" AND ")
+	text_conditions=possibility.split("AND")
 	for condition in text_conditions:
-		parts=condition.split(" ")
-		if parts[0].isnumeric():
+		parts=condition.split()
+		if len(parts)==3:
+			if parts[2] not in all_cats:
+				print("Possibiilty: " +possibility+ " contains unlisted card or category "+ parts[2])
+				sys.exit(0)
+			if parts[1] not in ['-','+','='] or not parts[0].isdigit():
+				print("Check formatting of line: "+possibility)
+				sys.exit(0)
 			conditions.append([parts[2],int(parts[0]),parts[1]])
-		else:
+		elif len(parts)==1:
 			conditions.append([parts[0], 1, '+'])
+		else:
+			print("Check formatting of input_possibilities_here, line: "+possibility)	
 	possibilities.append(conditions)
 
 counter=0
