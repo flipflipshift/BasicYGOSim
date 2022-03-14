@@ -134,7 +134,7 @@ def is_one_valid_draw(hand,extras,possibilities,can_extrav,can_desires,can_upsta
 	if can_upstart and "Upstart" in hand:
 		temp_hand=hand.copy()
 		temp_extras=extras.copy()
-		temp_hand.append(extras.pop(0))
+		temp_hand.append(temp_extras.pop())
 		temp_hand.remove("Upstart")
 		if is_one_valid_draw(temp_hand,temp_extras,possibilities,False,can_desires,can_upstart,False,can_duality):
 			return True
