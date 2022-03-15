@@ -151,6 +151,7 @@ def is_one_valid_draw(hand,extras,possibilities,can_extrav,can_desires,can_upsta
 card_hash = dict()
 deck=empty_deck(deck_size)
 all_cats=[]
+deck_count=0
 cardlines=input_cards_here.splitlines()
 cardlines.pop(0)
 for cardline in cardlines:
@@ -161,6 +162,7 @@ for cardline in cardlines:
 	except:
 		print("Error in input_cards_here, check line "+cardline)
 		sys.exit(0)
+	deck_count+=int(s[1])
 	all_cats.append(s[0])
 	card_cats=[]
 	card_cats.append(s[0])
@@ -169,6 +171,9 @@ for cardline in cardlines:
 		if s[i] not in all_cats:
 			all_cats.append(s[i])
 	card_hash[s[0]]=card_cats
+if deck_count>deck_size:
+	print("Inputted cards: "+str(deck_count)+". Exceeds deck size: "+str(deck_size))
+	sys.exit(0)
 
 possibilities=[]
 text_possibilities=input_possibilities_here.splitlines()
@@ -182,13 +187,16 @@ for possibility in text_possibilities:
 		parts=condition.split()
 		if len(parts)==3:
 			if parts[2] not in all_cats:
-				print("Possibiilty: " +possibility+ " contains unlisted card or category "+ parts[2])
+				print("Possibility: " +possibility+ " contains unlisted card or category "+ parts[2])
 				sys.exit(0)
 			if parts[1] not in ['-','+','='] or not parts[0].isdigit():
 				print("Check formatting of line: "+possibility)
 				sys.exit(0)
 			conditions.append([parts[2],int(parts[0]),parts[1]])
 		elif len(parts)==1:
+			if parts[0] not in all_cats:
+				print("Possibility: " +possibility+ " contains unlisted card or category "+ parts[0])
+				sys.exit(0)			
 			conditions.append([parts[0], 1, '+'])
 		else:
 			print("Check formatting of input_possibilities_here, line: "+possibility)	
