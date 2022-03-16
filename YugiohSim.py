@@ -61,9 +61,8 @@ def add_card(deck, name, quantity):
 		deck.append(name)
 	return deck
 
-def get_hand(deck, k):
-	m=min(len(deck),k+9)
-	for i in range(0,m):
+def get_hand(deck, k, num_extras):
+	for i in range(0,k+num_extras):
 		rand=random.randint(i,len(deck)-1)
 		temp=deck[rand]
 		deck[rand]=deck[i]
@@ -72,7 +71,7 @@ def get_hand(deck, k):
 	extras=[]
 	for i in range(0,k):
 		hand.append(deck[i])
-	for i in range(k,m):
+	for i in range(k,k+num_extras):
 		extras.append(deck[i])
 	return([hand,extras])
 
@@ -152,6 +151,7 @@ card_hash = dict()
 deck=empty_deck(deck_size)
 all_cats=[]
 deck_count=0
+num_extras=0
 cardlines=input_cards_here.splitlines()
 cardlines.pop(0)
 for cardline in cardlines:
@@ -164,6 +164,8 @@ for cardline in cardlines:
 		sys.exit(0)
 	deck_count+=int(s[1])
 	all_cats.append(s[0])
+	if s[0]=="Upstart":
+	    num_extras+=int(s[1])
 	card_cats=[]
 	card_cats.append(s[0])
 	for i in range(2, len(s)):
@@ -171,6 +173,12 @@ for cardline in cardlines:
 		if s[i] not in all_cats:
 			all_cats.append(s[i])
 	card_hash[s[0]]=card_cats
+if "Prosperity" in deck or "Extravagance" in deck:
+    num_extras+=6
+if "Duality" in deck:
+    num_extras+=3
+if "Desires" in deck:
+    num_extras+=2
 if deck_count>deck_size:
 	print("Inputted cards: "+str(deck_count)+". Exceeds deck size: "+str(deck_size))
 	sys.exit(0)
@@ -204,7 +212,7 @@ for possibility in text_possibilities:
 
 counter=0
 for i in range(0,num_trials):
-	hand=get_hand(deck,hand_size)
+	hand=get_hand(deck,hand_size, num_extras)
 	if is_one_valid_draw(hand[0],hand[1],possibilities,True,True,True,True,True):
 		counter+=1
 print("probability of success: "+ str(counter/num_trials*100)+"%")
